@@ -1,0 +1,60 @@
+---
+title: "Assignment #7-collaboration on repository and data cleanup"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(tidyr)
+
+dirtydata = read.csv("C:/Users/Bharath/Downloads/dirty_data.csv")
+colnames(dirtydata)
+head(dirtydata)
+
+datafilled=fill(dirtydata, Area, .direction = c("down"))
+datafilled
+
+datafilled$Street = gsub("[^A-Za-z ]", " ",datafilled$Street)
+datafilled$Street = gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", "", datafilled$Street, perl=TRUE)
+
+datafilled$Street.2 = gsub("[^A-Za-z ]", " ", datafilled$Street.2)
+datafilled$Street.2 = gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", "", datafilled$Street.2, perl=TRUE)
+
+datafilled$Street = gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", datafilled$Street, perl=TRUE)
+datafilled$Street.2 =  gsub("(^|[[:space:]])([[:alpha:]])", "\\1\\U\\2", datafilled$Street.2, perl=TRUE)
+
+library('gsubfn')
+
+patterns     <- c("Lane", "Road", "Avenue", "Green", "Hospital", "Village", "Center", "Drive", "Circle", "Park","Street")
+replacements <- c("Lan.",  "Rd.", "Ave.", "Gr.","Hosp.","Vil.","Ctr.", "Dr.", "Cr.","Pk.","Str.")
+
+datafilled$Street = gsubfn("\\b\\w+\\b", as.list(setNames(replacements, patterns)), datafilled$Street)
+datafilled$Street.2 =  gsubfn("\\b\\w+\\b", as.list(setNames(replacements, patterns)), datafilled$Street.2)
+
+
+
+i = 1
+
+while(i < nrow(datafilled )) 
+{
+  if(datafilled$Street[i] == datafilled$Street.2 [i]) 
+  {
+    datafilled$Street.2 [i] = ""
+  }
+  i = i+1
+}
+
+
+datafilled = subset(datafilled[,1:4])
+head(datafilled)
+
+write.csv(datafilled, "C:/Users/Bharath/Downloads/clean_data.csv")
+
+```
+
